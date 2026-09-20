@@ -513,13 +513,20 @@ class _MainAppState extends PopScopeState<MainApp>
           child: bottomNav,
         );
         if (liquidGlass) {
-          bottomNav = GlassPanel(
-            radius: BorderRadius.circular(24),
-            borderSide: BorderSide(
-              color: _colorScheme.outline.withValues(alpha: 0.06),
-            ),
-            padding: const .symmetric(horizontal: 12, vertical: 8),
-            child: bottomNav,
+          bottomNav = Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              GlassPanel(
+                radius: BorderRadius.circular(24),
+                borderSide: BorderSide(
+                  color: _colorScheme.outline.withValues(alpha: 0.06),
+                ),
+                padding: const .symmetric(horizontal: 12, vertical: 8),
+                child: bottomNav,
+              ),
+              const SizedBox(width: 8),
+              _searchFab(),
+            ],
           );
         }
       }
@@ -531,11 +538,21 @@ class _MainAppState extends PopScopeState<MainApp>
     } else {
       sideBar = _sideBar(sideBarOnRight: sideBarOnRight);
       if (liquidGlass) {
-        sideBar = GlassPanel(
-          borderSide: BorderSide(
-            color: _colorScheme.outline.withValues(alpha: 0.08),
+        // 悬浮胶囊式液态玻璃侧边栏：上下左右留 margin，大圆角
+        sideBar = Padding(
+          padding: EdgeInsets.only(
+            top: 8,
+            bottom: 8,
+            left: sideBarOnRight ? 8 : 0,
+            right: sideBarOnRight ? 0 : 8,
           ),
-          child: sideBar,
+          child: GlassPanel(
+            radius: BorderRadius.circular(28),
+            borderSide: BorderSide(
+              color: _colorScheme.outline.withValues(alpha: 0.08),
+            ),
+            child: sideBar,
+          ),
         );
       } else {
         sideBar = DecoratedBox(
@@ -601,7 +618,7 @@ class _MainAppState extends PopScopeState<MainApp>
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [Color(0xFF1E3A8A), Color(0xFF3B82F6), Color(0xFF93C5FD)],
+                colors: [Color(0xFFE3F2FD), Color(0xFF90CAF9), Color(0xFFBBDEFB)],
               ),
             ),
           ),
@@ -619,6 +636,25 @@ class _MainAppState extends PopScopeState<MainApp>
         ),
         child,
       ],
+    );
+  }
+
+  /// 右下角独立圆形毛玻璃搜索按钮
+  Widget _searchFab() {
+    return GestureDetector(
+      onTap: () => Get.toNamed('/search'),
+      child: GlassPanel(
+        radius: BorderRadius.circular(24),
+        borderSide: BorderSide(
+          color: Colors.white.withValues(alpha: 0.25),
+          width: 0.8,
+        ),
+        child: const SizedBox(
+          width: 48,
+          height: 48,
+          child: Icon(Icons.search_outlined, size: 22),
+        ),
+      ),
     );
   }
 
@@ -646,6 +682,7 @@ class _MainAppState extends PopScopeState<MainApp>
         userAvatar(colorScheme: _colorScheme, mainController: _mainController),
         const SizedBox(height: 8),
         msgBadge(_mainController),
+        const Spacer(),
         IconButton(
           tooltip: '搜索',
           icon: const Icon(
@@ -654,6 +691,7 @@ class _MainAppState extends PopScopeState<MainApp>
           ),
           onPressed: () => Get.toNamed('/search'),
         ),
+        const SizedBox(height: 12),
       ],
     );
   }
