@@ -711,6 +711,12 @@ abstract final class Pref {
   static bool get useSideBar =>
       _setting.get(SettingBoxKey.useSideBar, defaultValue: false);
 
+  static bool get sideBarOnRight =>
+      _setting.get(SettingBoxKey.sideBarOnRight, defaultValue: false);
+
+  static bool get liquidGlass =>
+      _setting.get(SettingBoxKey.liquidGlass, defaultValue: false);
+
   static bool get dynamicsShowAllFollowedUp => _setting.get(
     SettingBoxKey.dynamicsShowAllFollowedUp,
     defaultValue: false,
