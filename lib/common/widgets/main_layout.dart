@@ -90,19 +90,8 @@ class _RenderMainLayout extends RenderBox
         BoxConstraints.tightFor(height: constraints.maxHeight),
       ).width;
 
-      if (glassFloating) {
-        // 悬浮毛玻璃：body 铺满全屏，侧边栏浮在其上
-        setOffset(
-          sideBar,
-          Offset(sideBarOnRight ? constraints.maxWidth - sideBarWidth : 0, 0),
-        );
-        bodyOffset = .zero;
-        bodyConstraints = BoxConstraints.tightFor(
-          width: constraints.maxWidth,
-          height: constraints.maxHeight,
-        );
-      } else if (sideBarOnRight) {
-        // 右手模式：侧边栏在右，body 在左
+      if (sideBarOnRight) {
+        // 右手模式：侧边栏在右，body 在左（玻璃模式同样让位，避免遮挡内容）
         setOffset(
           sideBar,
           Offset(constraints.maxWidth - sideBarWidth, 0),

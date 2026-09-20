@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:ui' show ImageFilter;
 
 import 'package:PiliPlus/common/assets.dart';
 import 'package:PiliPlus/common/constants.dart';
@@ -581,6 +580,7 @@ class _MainAppState extends PopScopeState<MainApp>
     }
 
     child = Material(
+      color: liquidGlass ? Colors.transparent : null,
       child: MainLayout(
         sideBar: sideBar,
         bottomNav: bottomNav,
@@ -592,6 +592,26 @@ class _MainAppState extends PopScopeState<MainApp>
         glassFloating: liquidGlass && sideBar != null,
       ),
     );
+
+    // 液态玻璃：渐变壁纸铺在最底层，侧边栏/底栏悬浮其上模糊
+    if (liquidGlass) {
+      child = Stack(
+        children: [
+          const Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFFE3F2FD), Color(0xFF90CAF9), Color(0xFFBBDEFB)],
+                ),
+              ),
+            ),
+          ),
+          Positioned.fill(child: child),
+        ],
+      );
+    }
 
     if (PlatformUtils.isMobile) {
       return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -610,34 +630,11 @@ class _MainAppState extends PopScopeState<MainApp>
     return child;
   }
 
-  /// 主界面玻璃背景：蓝色渐变壁纸 + 模糊层 + 半透明表面
+  /// 主界面玻璃层：半透明表面覆盖在渐变壁纸之上
   Widget _buildGlassBody(Widget child) {
-    return Stack(
-      children: [
-        const Positioned.fill(
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Color(0xFFE3F2FD), Color(0xFF90CAF9), Color(0xFFBBDEFB)],
-              ),
-            ),
-          ),
-        ),
-        Positioned.fill(
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
-            child: const SizedBox.expand(),
-          ),
-        ),
-        Positioned.fill(
-          child: ColoredBox(
-            color: _colorScheme.surface.withValues(alpha: 0.5),
-          ),
-        ),
-        child,
-      ],
+    return ColoredBox(
+      color: _colorScheme.surface.withValues(alpha: 0.55),
+      child: child,
     );
   }
 
