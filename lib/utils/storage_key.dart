@@ -226,6 +226,8 @@ abstract final class SettingBoxKey {
       upPanelPosition = 'upPanelPosition',
       dynamicsShowAllFollowedUp = 'dynamicsShowAllFollowedUp',
       useSideBar = 'useSideBar',
+      sideBarOnRight = 'sideBarOnRight',
+      liquidGlass = 'liquidGlass',
       enableMYBar = 'enableMYBar',
       hideTopBar = 'hideSearchBar',
       hideBottomBar = 'hideTabBar',

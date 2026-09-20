@@ -84,6 +84,22 @@ List<SettingsModel> get styleSettings => [
     defaultVal: false,
     needReboot: true,
   ),
+  const SwitchModel(
+    title: '侧边栏在右侧',
+    subtitle: '开启后侧边栏移到屏幕右侧，适合右手操作',
+    leading: Icon(Icons.view_sidebar_outlined),
+    setKey: SettingBoxKey.sideBarOnRight,
+    defaultVal: false,
+    needReboot: true,
+  ),
+  const SwitchModel(
+    title: '液态玻璃',
+    subtitle: '侧边栏、底栏使用毛玻璃效果，仅侧边栏模式生效',
+    leading: Icon(Icons.blur_on_outlined),
+    setKey: SettingBoxKey.liquidGlass,
+    defaultVal: false,
+    needReboot: true,
+  ),
   NormalModel(
     title: 'App字体设置',
     subtitle: '点击设置',

@@ -1,10 +1,12 @@
 import 'dart:io';
+import 'dart:ui' show ImageFilter;
 
 import 'package:PiliPlus/common/assets.dart';
 import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/floating_navigation_bar.dart';
 import 'package:PiliPlus/common/widgets/flutter/pop_scope.dart';
+import 'package:PiliPlus/common/widgets/glass_panel.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/main_layout.dart';
 import 'package:PiliPlus/common/widgets/route_aware_mixin.dart';
@@ -22,6 +24,7 @@ import 'package:PiliPlus/utils/mobile_observer.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
+import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:material_ui/material_ui.dart';
@@ -406,16 +409,19 @@ class _MainAppState extends PopScopeState<MainApp>
     return bottomNav;
   }
 
-  Widget _sideBar() {
+  Widget _sideBar({required bool sideBarOnRight}) {
     if (_mainController.navigationBars.length > 1) {
       if (context.isTablet && _mainController.optTabletNav) {
         return Padding(
           padding: const .only(top: 25),
           child: MediaQuery.removePadding(
             context: context,
-            removeRight: true,
+            removeLeft: sideBarOnRight,
+            removeRight: !sideBarOnRight,
             child: DrawerTheme(
-              data: DrawerThemeData(width: 130 + _padding.left),
+              data: DrawerThemeData(
+                width: 130 + (sideBarOnRight ? _padding.right : _padding.left),
+              ),
               child: Obx(
                 () => NavigationDrawer(
                   /// apply `lib/scripts/navigation_drawer.patch`
@@ -468,7 +474,9 @@ class _MainAppState extends PopScopeState<MainApp>
     }
     return Container(
       width: 80,
-      margin: .only(top: 12 + _padding.top, left: _padding.left),
+      margin: sideBarOnRight
+          ? .only(top: 12 + _padding.top, right: _padding.right)
+          : .only(top: 12 + _padding.top, left: _padding.left),
       child: userAndSearchVertical(),
     );
   }
@@ -494,6 +502,8 @@ class _MainAppState extends PopScopeState<MainApp>
     Widget? sideBar;
     Widget? bottomNav;
     final EdgeInsets padding;
+    final bool sideBarOnRight = Pref.sideBarOnRight;
+    final bool liquidGlass = Pref.liquidGlass;
     if (_mainController.useBottomNav) {
       bottomNav = _bottomNav;
       if (bottomNav != null) {
@@ -502,6 +512,16 @@ class _MainAppState extends PopScopeState<MainApp>
           removeTop: true,
           child: bottomNav,
         );
+        if (liquidGlass) {
+          bottomNav = GlassPanel(
+            radius: BorderRadius.circular(24),
+            borderSide: BorderSide(
+              color: _colorScheme.outline.withValues(alpha: 0.06),
+            ),
+            padding: const .symmetric(horizontal: 12, vertical: 8),
+            child: bottomNav,
+          );
+        }
       }
       padding = .only(
         top: _padding.top,
@@ -509,24 +529,48 @@ class _MainAppState extends PopScopeState<MainApp>
         right: _padding.right,
       );
     } else {
-      sideBar = DecoratedBox(
-        decoration: BoxDecoration(
-          border: Border(
-            right: BorderSide(
-              color: _colorScheme.outline.withValues(alpha: 0.06),
+      sideBar = _sideBar(sideBarOnRight: sideBarOnRight);
+      if (liquidGlass) {
+        sideBar = GlassPanel(
+          borderSide: BorderSide(
+            color: _colorScheme.outline.withValues(alpha: 0.08),
+          ),
+          child: sideBar,
+        );
+      } else {
+        sideBar = DecoratedBox(
+          decoration: BoxDecoration(
+            border: Border(
+              left: sideBarOnRight
+                  ? BorderSide(
+                      color: _colorScheme.outline.withValues(alpha: 0.06),
+                    )
+                  : BorderSide.none,
+              right: sideBarOnRight
+                  ? BorderSide.none
+                  : BorderSide(
+                      color: _colorScheme.outline.withValues(alpha: 0.06),
+                    ),
             ),
           ),
-        ),
-        child: _sideBar(),
-      );
-      padding = .only(top: _padding.top, right: _padding.right);
+          child: sideBar,
+        );
+      }
+      padding = sideBarOnRight
+          ? .only(top: _padding.top, left: _padding.left)
+          : .only(top: _padding.top, right: _padding.right);
     }
 
     child = Material(
       child: MainLayout(
         sideBar: sideBar,
         bottomNav: bottomNav,
-        body: Padding(padding: padding, child: child),
+        body: Padding(
+          padding: padding,
+          child: liquidGlass ? _buildGlassBody(child) : child,
+        ),
+        sideBarOnRight: sideBarOnRight,
+        glassFloating: liquidGlass && sideBar != null,
       ),
     );
 
@@ -547,8 +591,38 @@ class _MainAppState extends PopScopeState<MainApp>
     return child;
   }
 
-  Widget _buildIcon({required NavigationBarType type, bool selected = false}) {
-    final icon = selected ? type.selectIcon : type.icon;
+  /// 主界面玻璃背景：蓝色渐变壁纸 + 模糊层 + 半透明表面
+  Widget _buildGlassBody(Widget child) {
+    return Stack(
+      children: [
+        const Positioned.fill(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFF1E3A8A), Color(0xFF3B82F6), Color(0xFF93C5FD)],
+              ),
+            ),
+          ),
+        ),
+        Positioned.fill(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+            child: const SizedBox.expand(),
+          ),
+        ),
+        Positioned.fill(
+          child: ColoredBox(
+            color: _colorScheme.surface.withValues(alpha: 0.5),
+          ),
+        ),
+        child,
+      ],
+    );
+  }
+
+  Widget _buildIcon({required NavigationBarType type, bool selected = false}) {    final icon = selected ? type.selectIcon : type.icon;
     return type == .dynamics
         ? Obx(
             () {

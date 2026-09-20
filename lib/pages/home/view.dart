@@ -9,7 +9,7 @@ import 'package:PiliPlus/pages/mine/controller.dart';
 import 'package:PiliPlus/utils/extension/get_ext.dart';
 import 'package:PiliPlus/utils/extension/size_ext.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
-import 'package:get/get.dart';
+import 'package:PiliPlus/utils/storage_pref.dart';import 'package:get/get.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -68,7 +68,9 @@ class _HomePageState extends CommonPageState<HomePage>
       if (_homeController.hideTopBar &&
           _mainController.barHideType == .instant) {
         tabBar = Material(
-          color: _colorScheme.surface,
+          color: Pref.liquidGlass
+              ? _colorScheme.surface.withValues(alpha: 0.35)
+              : _colorScheme.surface,
           child: tabBar,
         );
       }
