@@ -420,7 +420,7 @@ class _MainAppState extends PopScopeState<MainApp>
             removeRight: !sideBarOnRight,
             child: DrawerTheme(
               data: DrawerThemeData(
-                width: 130 + (sideBarOnRight ? _padding.right : _padding.left),
+                width: 72 + (sideBarOnRight ? _padding.right : _padding.left),
               ),
               child: Obx(
                 () => NavigationDrawer(
@@ -548,6 +548,8 @@ class _MainAppState extends PopScopeState<MainApp>
           ),
           child: GlassPanel(
             radius: BorderRadius.circular(28),
+            opacity: 0.38,
+            blur: 30,
             borderSide: BorderSide(
               color: _colorScheme.outline.withValues(alpha: 0.08),
             ),
